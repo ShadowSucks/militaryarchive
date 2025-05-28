@@ -1,11 +1,20 @@
 const API_URL = "https://m.bahushbot.ir:3002/api/media";
-async function fetchMedia() {
+let debounceTimer = null;
+
+// fetch & render, passing an optional search term
+async function fetchMedia(searchTerm = "") {
   try {
-    const res = await fetch(API_URL);
+    // build URL with ?title=…
+    const url = new URL(API_URL);
+    if (searchTerm) url.searchParams.set("title", searchTerm);
+
+    const res = await fetch(url.toString());
     if (!res.ok) throw new Error(res.statusText);
     const { data } = await res.json();
 
     const gallery = document.getElementById("gallery");
+    gallery.innerHTML = ""; // clear old cards
+
     const tpl = document.getElementById("card-template");
 
     data.forEach((item) => {
@@ -14,22 +23,41 @@ async function fetchMedia() {
       const title = clone.querySelector(".card-title");
       const desc = clone.querySelector(".card-desc");
 
-      img.src = item.url;
+      img.src = item.imageUrl || item.url;
       img.alt = item.title || item.filename;
 
       title.textContent = item.title || item.filename;
+
       if (item.description) {
         desc.textContent = item.description;
       } else {
-        desc.remove(); // no description → remove the <p>
+        desc.remove();
       }
 
       gallery.appendChild(clone);
     });
   } catch (err) {
-    console.error(err);
+    console.error("fetchMedia error:", err);
     document.getElementById("gallery").textContent = "Error loading media.";
   }
 }
 
-document.addEventListener("DOMContentLoaded", fetchMedia);
+// Debounce wrapper for the input
+function onSearchInput(e) {
+  const term = e.target.value.trim();
+
+  clearTimeout(debounceTimer);
+  debounceTimer = setTimeout(() => {
+    fetchMedia(term);
+  }, 300); // 300ms delay; tweak as you like
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+  // initial load
+  fetchMedia();
+
+  // wire up search
+  document
+    .getElementById("search-input")
+    .addEventListener("input", onSearchInput);
+});

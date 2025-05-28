@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Dashboard — Media Gallery</title>
+    <link rel="stylesheet" href="../styles.css" />
+  </head>
+  <body>
+    <header>
+      <h1>Dashboard</h1>
+      <button id="logout-btn">Logout</button>
+    </header>
+
+    <main class="dashboard-container">
+      <h2>Welcome back 👋</h2>
+      <p>
+        This is your media management dashboard. You can add or manage your
+        media files here. More features coming soon!
+      </p>
+
+      <div class="actions">
+        <button onclick="window.location.href='../index.html'">
+          📁 View Gallery
+        </button>
+        <button id="toggle-form">➕ Add Media</button>
+
+        <button disabled>🗑️ Manage Media</button>
+      </div>
+      <div id="upload-status"></div>
+      <form id="upload-form" style="display: none; margin-top: 1.5rem">
+        <label>
+          Select File:
+          <input type="file" name="file" required />
+        </label>
+        <br /><br />
+        <label>
+          Title:
+          <input type="text" name="title" required />
+        </label>
+        <br /><br />
+        <label>
+          Description (optional):
+          <textarea name="description" rows="3"></textarea>
+        </label>
+        <br /><br />
+        <button type="submit">Upload</button>
+      </form>
+    </main>
+
+    <script src="dashboard.js"></script>
+  </body>
+</html>

@@ -93,7 +93,6 @@ app.post(
       const imageUrl = `https://m.bahushbot.ir:3002/media/${relPath}`;
 
       const { title, description, createdBy, createdAt } = req.body;
-
       const doc = new Media({
         imageUrl,
         title,
