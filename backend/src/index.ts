@@ -5,14 +5,20 @@ dotenv.config();
 import express, { Request, Response } from "express";
 import mongoose, { Document, Schema } from "mongoose";
 import path from "path";
-import { Dirent } from "fs";
+import fs, { Dirent } from "fs";
 import { readdir } from "fs/promises";
 import { verifyUser, createUser } from "./auth";
 import cors from "cors";
+import https from "https";
 // ----- Config -----
 const MONGO_URI = process.env.MONGO_URI!;
 const PORT = process.env.PORT!;
 const MEDIA_DIR = path.join(__dirname, "media");
+
+const SSL_OPTIONS = {
+  key: fs.readFileSync(path.join(__dirname, "SSL", "privkey.pem")),
+  cert: fs.readFileSync(path.join(__dirname, "SSL", "fullchain.pem")),
+};
 
 // ----- Mongoose Setup -----
 interface IMedia extends Document {
@@ -136,12 +142,14 @@ app.post("/auth/login", async (req, res) => {
 // Serve static files
 app.use("/media", express.static(MEDIA_DIR));
 
-// Mongo + start
 mongoose
   .connect(MONGO_URI)
   .then(() => {
     console.log("MongoDB connected");
-    app.listen(PORT, () => console.log(`Listening on ${PORT}`));
+
+    https.createServer(SSL_OPTIONS, app).listen(PORT, () => {
+      console.log(`HTTPS server listening on port ${PORT}`);
+    });
   })
   .catch((e) => {
     console.error(e);
