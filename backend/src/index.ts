@@ -45,7 +45,8 @@ type MediaResult = {
 
 // ----- Express App -----
 const app = express();
-app.use(cors());
+app.use(cors({ origin: "*" }));
+
 app.use(express.json());
 
 // Recursively walk a directory

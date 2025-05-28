@@ -1,7 +1,7 @@
-const API_URL = "http://m.bahushbot.ir:3002/api/media";
+const API_URL = "https://m.bahushbot.ir:3002/api/media";
 async function fetchMedia() {
   try {
-    const res = await fetch(API_URL);
+    const res = await fetch(API_URL, { mode: "no-cors" });
     if (!res.ok) throw new Error(res.statusText);
     const { data } = await res.json();
 
@@ -27,7 +27,7 @@ async function fetchMedia() {
       gallery.appendChild(clone);
     });
   } catch (err) {
-    console.error("Failed to fetch media:", err);
+    console.error(err);
     document.getElementById("gallery").textContent = "Error loading media.";
   }
 }
