@@ -8,7 +8,7 @@ import path from "path";
 import { Dirent } from "fs";
 import { readdir } from "fs/promises";
 import { verifyUser, createUser } from "./auth";
-
+import cors from "cors";
 // ----- Config -----
 const MONGO_URI = process.env.MONGO_URI!;
 const PORT = process.env.PORT!;
@@ -39,6 +39,7 @@ type MediaResult = {
 
 // ----- Express App -----
 const app = express();
+app.use(cors());
 app.use(express.json());
 
 // Recursively walk a directory
