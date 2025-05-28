@@ -1,19 +1,21 @@
 const API_URL = "https://m.bahushbot.ir:3002/api/media";
 let debounceTimer = null;
+let currentPage = 1;
+let currentSearch = "";
 
-// fetch & render, passing an optional search term
-async function fetchMedia(searchTerm = "") {
+async function fetchMedia(searchTerm = "", page = 1) {
   try {
-    // build URL with ?title=…
     const url = new URL(API_URL);
     if (searchTerm) url.searchParams.set("title", searchTerm);
+    url.searchParams.set("page", page);
+    url.searchParams.set("limit", 20); // or whatever
 
     const res = await fetch(url.toString());
     if (!res.ok) throw new Error(res.statusText);
-    const { data } = await res.json();
+    const { data, page: current, total, limit } = await res.json();
 
     const gallery = document.getElementById("gallery");
-    gallery.innerHTML = ""; // clear old cards
+    gallery.innerHTML = "";
 
     const tpl = document.getElementById("card-template");
 
@@ -25,7 +27,6 @@ async function fetchMedia(searchTerm = "") {
 
       img.src = item.imageUrl || item.url;
       img.alt = item.title || item.filename;
-
       title.textContent = item.title || item.filename;
 
       if (item.description) {
@@ -36,28 +37,43 @@ async function fetchMedia(searchTerm = "") {
 
       gallery.appendChild(clone);
     });
+
+    // pagination info
+    document.getElementById("page-info").textContent = `Page ${current}`;
+    document.getElementById("prev-page").disabled = current <= 1;
+    document.getElementById("next-page").disabled = current * limit >= total;
   } catch (err) {
     console.error("fetchMedia error:", err);
     document.getElementById("gallery").textContent = "Error loading media.";
   }
 }
 
-// Debounce wrapper for the input
 function onSearchInput(e) {
   const term = e.target.value.trim();
-
   clearTimeout(debounceTimer);
   debounceTimer = setTimeout(() => {
-    fetchMedia(term);
-  }, 300); // 300ms delay; tweak as you like
+    currentSearch = term;
+    currentPage = 1;
+    fetchMedia(term, currentPage);
+  }, 300);
 }
 
 document.addEventListener("DOMContentLoaded", () => {
-  // initial load
   fetchMedia();
 
-  // wire up search
   document
     .getElementById("search-input")
     .addEventListener("input", onSearchInput);
+
+  document.getElementById("prev-page").addEventListener("click", () => {
+    if (currentPage > 1) {
+      currentPage--;
+      fetchMedia(currentSearch, currentPage);
+    }
+  });
+
+  document.getElementById("next-page").addEventListener("click", () => {
+    currentPage++;
+    fetchMedia(currentSearch, currentPage);
+  });
 });

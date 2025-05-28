@@ -5,11 +5,11 @@ const logoutBtn = document.getElementById("logout-btn");
 let username = null;
 window.addEventListener("DOMContentLoaded", () => {
   let t = localStorage.getItem("username");
-  console.log(t);
   if (!(t != null && t != undefined)) {
-    username = t;
     alert("You are not logged in");
     window.location.href = "../login";
+  } else {
+    username = t;
   }
 });
 toggleBtn.addEventListener("click", () => {

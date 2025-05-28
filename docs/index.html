@@ -25,7 +25,7 @@
   </head>
   <body>
     <header>
-      <h1>Media Gallery</h1>
+      <h1>Military Gallery</h1>
       <input
         id="search-input"
         type="text"
@@ -36,7 +36,11 @@
     <main id="gallery">
       <!-- Cards will go here -->
     </main>
-
+    <div id="pagination" class="pagination-controls">
+      <button id="prev-page">Previous</button>
+      <span id="page-info">Page 1</span>
+      <button id="next-page">Next</button>
+    </div>
     <template id="card-template">
       <div class="card">
         <img class="card-img" src="" alt="" />

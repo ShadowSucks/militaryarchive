@@ -259,3 +259,30 @@ header button#logout-btn:hover {
   margin-top: 1rem;
   font-weight: bold;
 }
+
+.pagination-controls {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem;
+}
+
+.pagination-controls button {
+  padding: 0.5rem 1rem;
+  background: #e62429;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+.pagination-controls button:disabled {
+  background: #555;
+  cursor: not-allowed;
+}
+
+#page-info {
+  color: #fff;
+}
