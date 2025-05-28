@@ -6,12 +6,11 @@ import express, { Request, Response } from "express";
 import mongoose, { Document, Schema } from "mongoose";
 import path from "path";
 import fs, { Dirent } from "fs";
-import { readdir } from "fs/promises";
 import { verifyUser, createUser } from "./auth";
 import cors from "cors";
 import https from "https";
 import multer from "multer";
-
+import slugify from "slugify";
 // ----- Config -----
 const MONGO_URI = process.env.MONGO_URI!;
 const PORT = process.env.PORT!;
@@ -69,6 +68,7 @@ app.use(express.json());
 // expects multipart/form-data with fields:
 //   file: the image file
 //   title, description, createdBy, createdAt (ISO string or timestamp)
+
 app.post(
   "/api/add",
   upload.single("file"),
@@ -78,13 +78,20 @@ app.post(
         res.status(400).json({ error: "No file uploaded" });
       }
 
-      // build the URL under /media
-      const relPath = path
-        .relative(MEDIA_DIR, req.file!.path)
-        .replace(/\\/g, "/");
-      const imageUrl = `${req.protocol}://${req.get("host")}/media/${relPath}`;
+      // Sanitize filename
+      const originalExt = path.extname(req.file!.originalname);
+      const baseName = path.basename(req.file!.originalname, originalExt);
+      const safeName = slugify(baseName, { lower: true, strict: true });
+      const finalName = `${safeName}-${Date.now()}${originalExt}`;
+      const finalPath = path.join(path.dirname(req.file!.path), finalName);
 
-      // pull other fields
+      // Rename file
+      await fs.promises.rename(req.file!.path, finalPath);
+
+      // Build image URL
+      const relPath = path.relative(MEDIA_DIR, finalPath).replace(/\\/g, "/");
+      const imageUrl = `https://m.bahushbot.ir:3002/media/${relPath}`;
+
       const { title, description, createdBy, createdAt } = req.body;
 
       const doc = new Media({
@@ -103,20 +110,6 @@ app.post(
     }
   }
 );
-// Recursively walk a directory
-async function walkDir(dir: string): Promise<string[]> {
-  let files: string[] = [];
-  const entries: Dirent[] = await readdir(dir, { withFileTypes: true });
-  for (const ent of entries) {
-    const full = path.join(dir, ent.name);
-    if (ent.isDirectory()) {
-      files = files.concat(await walkDir(full));
-    } else {
-      files.push(full);
-    }
-  }
-  return files;
-}
 
 // GET /api/media
 app.get("/api/media", async (req: Request, res: Response) => {
