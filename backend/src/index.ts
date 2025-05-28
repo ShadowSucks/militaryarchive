@@ -10,6 +10,8 @@ import { readdir } from "fs/promises";
 import { verifyUser, createUser } from "./auth";
 import cors from "cors";
 import https from "https";
+import multer from "multer";
+
 // ----- Config -----
 const MONGO_URI = process.env.MONGO_URI!;
 const PORT = process.env.PORT!;
@@ -22,15 +24,19 @@ const SSL_OPTIONS = {
 
 // ----- Mongoose Setup -----
 interface IMedia extends Document {
-  filename: string;
+  imageUrl: string;
   title: string;
   description?: string;
+  createdAt: Date;
+  createdBy: string;
 }
 
 const MediaSchema = new Schema<IMedia>({
-  filename: { type: String, required: true, unique: true },
+  imageUrl: { type: String, required: true },
   title: { type: String, required: true },
   description: { type: String, required: false },
+  createdAt: { type: Date, required: true, default: () => new Date() },
+  createdBy: { type: String, required: true },
 });
 
 const Media = mongoose.model<IMedia>("Media", MediaSchema);
@@ -42,13 +48,61 @@ type MediaResult = {
   title?: string;
   description?: string;
 };
+const storage = multer.diskStorage({
+  destination: (_req, _file, cb) => {
+    cb(null, MEDIA_DIR);
+  },
+  filename: (_req, file, cb) => {
+    // e.g. add timestamp prefix to avoid collisions
+    const name = `${Date.now()}-${file.originalname}`;
+    cb(null, name);
+  },
+});
+const upload = multer({ storage });
 
 // ----- Express App -----
 const app = express();
 app.use(cors({ origin: "*" }));
 
 app.use(express.json());
+// POST /api/add
+// expects multipart/form-data with fields:
+//   file: the image file
+//   title, description, createdBy, createdAt (ISO string or timestamp)
+app.post(
+  "/api/add",
+  upload.single("file"),
+  async (req: Request, res: Response) => {
+    try {
+      if (!req.file) {
+        res.status(400).json({ error: "No file uploaded" });
+      }
 
+      // build the URL under /media
+      const relPath = path
+        .relative(MEDIA_DIR, req.file!.path)
+        .replace(/\\/g, "/");
+      const imageUrl = `${req.protocol}://${req.get("host")}/media/${relPath}`;
+
+      // pull other fields
+      const { title, description, createdBy, createdAt } = req.body;
+
+      const doc = new Media({
+        imageUrl,
+        title,
+        description: description || undefined,
+        createdBy,
+        createdAt: createdAt ? new Date(createdAt) : new Date(),
+      });
+
+      await doc.save();
+      res.json({ success: true, item: doc });
+    } catch (err: any) {
+      console.error(err);
+      res.status(500).json({ success: false, error: err.message });
+    }
+  }
+);
 // Recursively walk a directory
 async function walkDir(dir: string): Promise<string[]> {
   let files: string[] = [];
@@ -69,47 +123,29 @@ app.get("/api/media", async (req: Request, res: Response) => {
   try {
     const page = parseInt(req.query.page as string) || 1;
     const limit = parseInt(req.query.limit as string) || 20;
-    const titleFilter = (req.query.title as string)?.toLowerCase();
-    const descFilter = (req.query.description as string)?.toLowerCase();
+    const titleFilter = (req.query.title as string)?.trim();
+    const descFilter = (req.query.description as string)?.trim();
 
-    const filePaths = await walkDir(MEDIA_DIR);
-    const baseUrl = `${req.protocol}://${req.get("host")}/media`;
-
-    // Build a properly typed list:
-    let items: MediaResult[] = await Promise.all(
-      filePaths.map(async (fullPath) => {
-        const rel = path.relative(MEDIA_DIR, fullPath).replace(/\\/g, "/");
-        const filename = path.basename(fullPath);
-        const url = `${baseUrl}/${rel}`;
-        const dbItem = await Media.findOne({ filename }).lean();
-
-        if (dbItem) {
-          return {
-            filename,
-            url,
-            title: dbItem.title,
-            description: dbItem.description,
-          };
-        }
-        return { filename, url };
-      })
-    );
-
-    // Filtering
+    // Build a Mongo filter with case‑insensitive regex for both fields
+    const filter: Record<string, any> = {};
     if (titleFilter) {
-      items = items.filter((i) => i.title?.toLowerCase().includes(titleFilter));
+      filter.title = { $regex: titleFilter, $options: "i" };
     }
     if (descFilter) {
-      items = items.filter((i) =>
-        i.description?.toLowerCase().includes(descFilter)
-      );
+      filter.description = { $regex: descFilter, $options: "i" };
     }
 
-    // Pagination
-    const start = (page - 1) * limit;
-    const data = items.slice(start, start + limit);
+    // Total count for pagination
+    const total = await Media.countDocuments(filter);
 
-    res.json({ page, limit, total: items.length, data });
+    // Fetch and page
+    const data = await Media.find(filter)
+      .sort({ createdAt: -1 })
+      .skip((page - 1) * limit)
+      .limit(limit)
+      .lean();
+
+    res.json({ page, limit, total, data });
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: "Server error" });

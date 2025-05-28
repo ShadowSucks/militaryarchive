@@ -1,7 +1,7 @@
 const API_URL = "https://m.bahushbot.ir:3002/api/media";
 async function fetchMedia() {
   try {
-    const res = await fetch(API_URL, { mode: "no-cors" });
+    const res = await fetch(API_URL);
     if (!res.ok) throw new Error(res.statusText);
     const { data } = await res.json();
 
