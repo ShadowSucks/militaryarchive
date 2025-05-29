@@ -26,13 +26,15 @@ async function fetchMedia(searchTerm = "", page = 1) {
       const vid = clone.querySelector(".card-video");
       const title = clone.querySelector(".card-title");
       const desc = clone.querySelector(".card-desc");
-      if (item.filetype == "video") {
-        vid.src = item.imageUrl || item.url;
-        vid.alt = item.title || item.filename;
+
+      if (item.filetype === "video") {
+        vid.src = url;
+        vid.style.display = "block";
         img.style.display = "none";
       } else {
-        img.src = item.imageUrl || item.url;
+        img.src = url;
         img.alt = item.title || item.filename;
+        img.style.display = "block";
         vid.style.display = "none";
       }
 
