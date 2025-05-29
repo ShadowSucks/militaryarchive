@@ -28,7 +28,7 @@ async function fetchMedia(searchTerm = "", page = 1) {
       if (item.filetype == "video") {
         vid.src = item.imageUrl || item.url;
         vid.alt = item.title || item.filename;
-      } else if (item.filetype == "image") {
+      } else {
         img.src = item.imageUrl || item.url;
         img.alt = item.title || item.filename;
       }
