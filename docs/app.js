@@ -27,12 +27,12 @@ async function fetchMedia(searchTerm = "", page = 1) {
       const title = clone.querySelector(".card-title");
       const desc = clone.querySelector(".card-desc");
 
-      if (item.filetype === "video") {
-        vid.src = url;
+      if (item.fileType == "video") {
+        vid.src = item.imageUrl || item.url;
         vid.style.display = "block";
         img.style.display = "none";
       } else {
-        img.src = url;
+        img.src = item.imageUrl || item.url;
         img.alt = item.title || item.filename;
         img.style.display = "block";
         vid.style.display = "none";

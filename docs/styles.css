@@ -283,13 +283,13 @@ header button#logout-btn:hover {
 }
 .card-video {
   width: 100%;
-  object-fit: contain;
+  object-fit: fill;
   aspect-ratio: 16/9;
   background: #2a2a2a;
 }
 .card-img {
   width: 100%;
-  object-fit: contain;
+  object-fit: fill;
   aspect-ratio: 16/9;
   background: #2a2a2a;
 }
