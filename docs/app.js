@@ -22,11 +22,17 @@ async function fetchMedia(searchTerm = "", page = 1) {
     data.forEach((item) => {
       const clone = tpl.content.cloneNode(true);
       const img = clone.querySelector(".card-img");
+      const vid = clone.querySelector(".card-video");
       const title = clone.querySelector(".card-title");
       const desc = clone.querySelector(".card-desc");
+      if (item.filetype == "video") {
+        vid.src = item.imageUrl || item.url;
+        vid.alt = item.title || item.filename;
+      } else {
+        img.src = item.imageUrl || item.url;
+        img.alt = item.title || item.filename;
+      }
 
-      img.src = item.imageUrl || item.url;
-      img.alt = item.title || item.filename;
       title.textContent = item.title || item.filename;
 
       if (item.description) {
