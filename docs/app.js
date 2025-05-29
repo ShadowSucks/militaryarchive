@@ -20,6 +20,7 @@ async function fetchMedia(searchTerm = "", page = 1) {
     const tpl = document.getElementById("card-template");
 
     data.forEach((item) => {
+      console.log(item);
       const clone = tpl.content.cloneNode(true);
       const img = clone.querySelector(".card-img");
       const vid = clone.querySelector(".card-video");
@@ -28,9 +29,11 @@ async function fetchMedia(searchTerm = "", page = 1) {
       if (item.filetype == "video") {
         vid.src = item.imageUrl || item.url;
         vid.alt = item.title || item.filename;
+        img.style.display = "none";
       } else {
         img.src = item.imageUrl || item.url;
         img.alt = item.title || item.filename;
+        vid.style.display = "none";
       }
 
       title.textContent = item.title || item.filename;
