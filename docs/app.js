@@ -20,26 +20,46 @@ async function fetchMedia(searchTerm = "", page = 1) {
     const tpl = document.getElementById("card-template");
 
     data.forEach((item) => {
-      console.log(item);
       const clone = tpl.content.cloneNode(true);
       const img = clone.querySelector(".card-img");
       const vid = clone.querySelector(".card-video");
       const title = clone.querySelector(".card-title");
       const desc = clone.querySelector(".card-desc");
+      const fullscreenBtn = clone.querySelector(".btn-fullscreen");
+      const downloadBtn = clone.querySelector(".btn-download");
 
-      if (item.fileType == "video") {
-        vid.src = item.imageUrl || item.url;
-        vid.style.display = "block";
+      const isVideo = item.fileType == "video";
+      const mediaUrl = item.imageUrl || item.url;
+      const titlet = item.title || item.filename;
+      if (isVideo) {
+        vid.src = mediaUrl;
+        vid.alt = titlet;
         img.style.display = "none";
       } else {
-        img.src = item.imageUrl || item.url;
-        img.alt = item.title || item.filename;
-        img.style.display = "block";
+        img.src = mediaUrl;
+        img.alt = titlet;
         vid.style.display = "none";
       }
 
-      title.textContent = item.title || item.filename;
+      downloadBtn.href = mediaUrl;
+      // Fullscreen (modal)
+      fullscreenBtn.onclick = () => {
+        modal.classList.remove("hidden");
+        if (isVideo) {
+          modalImg.style.display = "none";
+          modalVideo.style.display = "block";
+          modalVideo.src = mediaUrl;
+          modalVideo.play();
+        } else {
+          modalVideo.pause();
+          modalVideo.style.display = "none";
+          modalImg.style.display = "block";
+          modalImg.src = mediaUrl;
+        }
+      };
 
+      // Set text
+      title.textContent = titlet;
       if (item.description) {
         desc.textContent = item.description;
       } else {
@@ -88,3 +108,15 @@ document.addEventListener("DOMContentLoaded", () => {
     fetchMedia(currentSearch, currentPage);
   });
 });
+
+const modal = document.getElementById("media-modal");
+const modalImg = document.getElementById("modal-img");
+const modalVideo = document.getElementById("modal-video");
+const closeBtn = document.querySelector(".modal-close");
+
+closeBtn.onclick = () => {
+  modal.classList.add("hidden");
+  modalImg.src = "";
+  modalVideo.pause();
+  modalVideo.src = "";
+};

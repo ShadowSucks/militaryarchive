@@ -21,6 +21,10 @@
         name="twitter:description"
         content="Military Gallery - Comprehensive gallery of military stuff"
       />
+      <link
+        rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
+      />
     </head>
   </head>
   <body>
@@ -36,6 +40,13 @@
     <main id="gallery">
       <!-- Cards will go here -->
     </main>
+    <div id="media-modal" class="media-modal hidden">
+      <button class="modal-close">
+        <i class="fas fa-times"></i>
+      </button>
+      <img id="modal-img" class="modal-content" />
+      <video id="modal-video" class="modal-content" controls></video>
+    </div>
     <div id="pagination" class="pagination-controls">
       <button id="prev-page">Previous</button>
       <span id="page-info">Page 1</span>
@@ -43,6 +54,14 @@
     </div>
     <template id="card-template">
       <div class="card">
+        <div class="card-controls">
+          <button class="btn-fullscreen" title="Fullscreen">
+            <i class="fas fa-expand"></i>
+          </button>
+          <a class="btn-download" download title="Download" target="_blank">
+            <i class="fas fa-download"></i>
+          </a>
+        </div>
         <img class="card-img" src="" alt="" />
         <video class="card-video" controls>
           Your browser does not support the video tag.
