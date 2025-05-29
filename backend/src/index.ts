@@ -24,6 +24,7 @@ const SSL_OPTIONS = {
 // ----- Mongoose Setup -----
 interface IMedia extends Document {
   imageUrl: string;
+  fileType?: string;
   title: string;
   description?: string;
   createdAt: Date;
@@ -32,6 +33,7 @@ interface IMedia extends Document {
 
 const MediaSchema = new Schema<IMedia>({
   imageUrl: { type: String, required: true },
+  fileType: { type: String, required: true },
   title: { type: String, required: true },
   description: { type: String, required: false },
   createdAt: { type: Date, required: true, default: () => new Date() },
@@ -40,13 +42,6 @@ const MediaSchema = new Schema<IMedia>({
 
 const Media = mongoose.model<IMedia>("Media", MediaSchema);
 
-// This is the shape every endpoint item will have:
-type MediaResult = {
-  filename: string;
-  url: string;
-  title?: string;
-  description?: string;
-};
 const storage = multer.diskStorage({
   destination: (_req, _file, cb) => {
     cb(null, MEDIA_DIR);
@@ -84,7 +79,14 @@ app.post(
       const safeName = slugify(baseName, { lower: true, strict: true });
       const finalName = `${safeName}-${Date.now()}${originalExt}`;
       const finalPath = path.join(path.dirname(req.file!.path), finalName);
+      let fileType: "image" | "video" | "other" = "other";
+      const mime = req.file!.mimetype;
 
+      if (mime.startsWith("image/")) {
+        fileType = "image";
+      } else if (mime.startsWith("video/")) {
+        fileType = "video";
+      }
       // Rename file
       await fs.promises.rename(req.file!.path, finalPath);
 
@@ -95,6 +97,7 @@ app.post(
       const { title, description, createdBy, createdAt } = req.body;
       const doc = new Media({
         imageUrl,
+        fileType,
         title,
         description: description || undefined,
         createdBy,
