@@ -47,3 +47,37 @@ form.addEventListener("submit", async (e) => {
     statusDiv.textContent = "❌ Error uploading file.";
   }
 });
+
+document
+  .getElementById("file-input")
+  .addEventListener("change", function (event) {
+    const file = event.target.files[0];
+    const previewContainer = document.getElementById("preview-container");
+    previewContainer.innerHTML = ""; // Clear previous previews
+
+    if (!file) return;
+
+    const fileType = file.type;
+    const fileURL = URL.createObjectURL(file);
+
+    if (fileType.startsWith("image/")) {
+      const img = document.createElement("img");
+      img.src = fileURL;
+      img.alt = "Image Preview";
+      img.style.maxWidth = "300px";
+      img.style.marginTop = "1rem";
+      previewContainer.appendChild(img);
+    } else if (fileType.startsWith("video/")) {
+      const video = document.createElement("video");
+      video.src = fileURL;
+      video.controls = true;
+      video.style.maxWidth = "300px";
+      video.style.marginTop = "1rem";
+      previewContainer.appendChild(video);
+    } else {
+      const message = document.createElement("p");
+      message.textContent =
+        "Selected file is not a supported image or video format.";
+      previewContainer.appendChild(message);
+    }
+  });

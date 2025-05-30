@@ -20,6 +20,10 @@
       name="twitter:description"
       content="Military Gallery - Comprehensive gallery of military stuff"
     />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
+    />
   </head>
   <body>
     <header>
@@ -36,30 +40,43 @@
 
       <div class="actions">
         <button onclick="window.location.href='../index.html'">
-          📁 View Gallery
+          <i class="fas fa-folder-open"></i> View Gallery
         </button>
-        <button id="toggle-form">➕ Add Media</button>
-
-        <button disabled>🗑️ Manage Media</button>
+        <button id="toggle-form">
+          <i class="fas fa-plus-circle"></i> Add Media
+        </button>
+        <button disabled><i class="fas fa-trash-alt"></i> Manage Media</button>
       </div>
       <div id="upload-status"></div>
       <form id="upload-form" style="display: none; margin-top: 1.5rem">
-        <label>
-          Select File:
-          <input type="file" name="file" required />
-        </label>
-        <br /><br />
-        <label>
-          Title:
-          <input type="text" name="title" required />
-        </label>
-        <br /><br />
-        <label>
-          Description (optional):
-          <textarea name="description" rows="3"></textarea>
-        </label>
-        <br /><br />
-        <button type="submit">Upload</button>
+        <div class="form-flex">
+          <div class="form-fields">
+            <label>
+              <i class="fas fa-file-upload"></i> Select File:
+              <input
+                type="file"
+                name="file"
+                id="file-input"
+                accept="image/*,video/*"
+                required
+              />
+            </label>
+            <br /><br />
+            <label>
+              <i class="fas fa-heading"></i> Title:
+              <input type="text" name="title" required />
+            </label>
+            <br /><br />
+            <label>
+              <i class="fas fa-align-left"></i> Description (optional):
+              <textarea name="description" rows="3"></textarea>
+            </label>
+            <br /><br />
+          </div>
+          <div id="preview-container" style="margin-top: 1rem"></div>
+          <br />
+        </div>
+        <button type="submit"><i class="fas fa-upload"></i> Upload</button>
       </form>
     </main>
 

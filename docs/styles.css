@@ -378,3 +378,60 @@ header button#logout-btn:hover {
   color: white;
   cursor: pointer;
 }
+/*  form + preview side by side  */
+.form-flex {
+  display: flex;
+  gap: 1.5rem;
+  align-items: flex-start;
+}
+
+/* form fields get the remaining space */
+.form-fields {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+/* preview box */
+#preview-container {
+  width: 300px;
+  height: 200px;
+  border: 2px dashed var(--input-border);
+  background: var(--input-bg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  overflow: hidden;
+}
+
+/* placeholder icon when empty */
+.preview-placeholder {
+  color: var(--muted-text-color);
+  font-size: 3rem;
+}
+
+/* when an image/video is in preview, make it fill */
+#preview-container img,
+#preview-container video {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+  display: block;
+}
+
+/* style form submit button */
+#upload-form button[type="submit"] {
+  background: var(--accent-color);
+  color: #fff;
+  border: none;
+  padding: 0.75rem 1.25rem;
+  font-size: 1rem;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+#upload-form button[type="submit"]:hover {
+  background: #d62839;
+}
