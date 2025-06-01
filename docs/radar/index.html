@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Radar Range Calculator</title>
+    <link rel="stylesheet" href="../styles.css" />
+    <style>
+      :root {
+        --bg-color: #121212;
+        --surface-color: #1e1e1e;
+        --text-color: #e0e0e0;
+        --muted-text-color: #aaaaaa;
+        --accent-color: #e63946;
+        --accent-color2: rgb(177, 38, 49);
+        --input-bg: #1a1a1a;
+        --input-border: #333;
+      }
+
+      body {
+        font-family: system-ui, sans-serif;
+        background: var(--bg-color);
+        color: var(--text-color);
+        margin: 0;
+        padding: 20px;
+        display: flex;
+        justify-content: center;
+      }
+
+      .calculator-container {
+        background: var(--surface-color);
+        width: 100%;
+        max-width: 500px;
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+      }
+
+      h1 {
+        text-align: center;
+        font-size: 1.5rem;
+        font-weight: bold;
+        margin-bottom: 30px;
+        color: var(--accent-color);
+      }
+
+      .input-group {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 15px;
+        padding: 0 10px;
+      }
+
+      label {
+        font-size: 0.9rem;
+        color: var(--text-color);
+        width: 160px;
+      }
+
+      input {
+        background: var(--input-bg);
+        color: var(--text-color);
+        border: 1px solid var(--input-border);
+        padding: 8px;
+        width: 200px;
+        border-radius: 4px;
+      }
+
+      input::placeholder {
+        color: var(--muted-text-color);
+      }
+
+      button {
+        background: var(--accent-color);
+        color: #fff;
+        border: none;
+        padding: 10px 30px;
+        font-size: 0.9rem;
+        font-weight: bold;
+        cursor: pointer;
+        display: block;
+        margin: 30px auto;
+        border-radius: 4px;
+        transition: background 0.2s;
+      }
+
+      button:hover {
+        background: #c91f23;
+      }
+
+      .result {
+        text-align: center;
+        font-size: 1rem;
+        margin: 20px 0;
+        padding: 10px;
+        color: var(--text-color);
+      }
+
+      footer {
+        background: var(--surface-color);
+        color: var(--muted-text-color);
+        font-size: 0.8rem;
+        text-align: center;
+        padding: 10px;
+        margin-top: 20px;
+        border-radius: 4px;
+      }
+      a {
+        color: var(--accent-color);
+        transition: 0.3s;
+      }
+      a:hover {
+        color: var(--accent-color2);
+      }
+    </style>
+  </head>
+
+  <body>
+    <div class="calculator-container">
+      <h1>Radar Range Calculator</h1>
+
+      <div class="input-group">
+        <label for="pt">Transmit Power (W):</label>
+        <input
+          type="number"
+          id="pt"
+          step="any"
+          placeholder="Enter transmit power"
+        />
+      </div>
+
+      <div class="input-group">
+        <label for="gain">Antenna Gain (dB):</label>
+        <input
+          type="number"
+          id="gain"
+          step="any"
+          placeholder="Enter antenna gain"
+        />
+      </div>
+
+      <div class="input-group">
+        <label for="freq">Frequency (Hz):</label>
+        <input
+          type="number"
+          id="freq"
+          step="any"
+          placeholder="Enter frequency"
+        />
+      </div>
+
+      <div class="input-group">
+        <label for="snr">Minimum SNR (dB):</label>
+        <input
+          type="number"
+          id="snr"
+          step="any"
+          placeholder="Enter minimum SNR"
+        />
+      </div>
+
+      <div class="input-group">
+        <label for="rcs">Target RCS (m²):</label>
+        <input
+          type="number"
+          id="rcs"
+          step="any"
+          placeholder="Enter target RCS"
+        />
+      </div>
+
+      <button onclick="calculateRange()">Calculate</button>
+
+      <div class="result" id="result">Max Detection Range:</div>
+
+      <footer>
+        © 2025 Radar Range Calculator | Twitter:
+        <a href="https://x.com/BasedSemyorka">@BasedSemyorka</a>
+      </footer>
+    </div>
+
+    <script>
+      // Constants
+      const SPEED_OF_LIGHT = 3e8; // m/s
+      const BOLTZMANN_CONST = 1.38e-23; // J/K
+      const STANDARD_TEMP = 290; // K (Noise reference temperature)
+
+      function calculateRange() {
+        try {
+          // Get inputs
+          const Pt = parseFloat(document.getElementById("pt").value);
+          const G_db = parseFloat(document.getElementById("gain").value);
+          const f = parseFloat(document.getElementById("freq").value);
+          const SNR_db = parseFloat(document.getElementById("snr").value);
+          const RCS = parseFloat(document.getElementById("rcs").value);
+
+          // Convert dB to linear scale
+          const G_linear = Math.pow(10, G_db / 10);
+          const SNR_linear = Math.pow(10, SNR_db / 10);
+
+          // Wavelength (λ)
+          const wavelength = SPEED_OF_LIGHT / f;
+
+          // Radar Range Equation
+          const numerator =
+            Pt * Math.pow(G_linear, 2) * Math.pow(wavelength, 2) * RCS;
+          const denominator =
+            Math.pow(4 * Math.PI, 3) *
+            BOLTZMANN_CONST *
+            STANDARD_TEMP *
+            1e6 *
+            1 *
+            SNR_linear; // Assuming B=1 MHz, F=1
+          const R_max = Math.pow(numerator / denominator, 0.25) / 1000; // km
+
+          // Display result
+          document.getElementById(
+            "result"
+          ).textContent = `Max Detection Range: ${R_max.toFixed(2)} km`;
+        } catch (error) {
+          document.getElementById("result").textContent =
+            "Invalid input! Please enter numbers.";
+        }
+      }
+    </script>
+  </body>
+</html>
